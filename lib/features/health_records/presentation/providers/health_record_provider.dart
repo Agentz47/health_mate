@@ -13,7 +13,6 @@ class HealthRecordProvider extends ChangeNotifier {
   int _currentStreak = 0;
   int _waterGoal = 2000;
   List<Map<String, dynamic>> _achievements = [];
-  List<Map<String, dynamic>> _earnedAchievements = [];
 
   HealthRecordProvider(this._repository);
 
@@ -26,7 +25,25 @@ class HealthRecordProvider extends ChangeNotifier {
   int get currentStreak => _currentStreak;
   int get waterGoal => _waterGoal;
   List<Map<String, dynamic>> get achievements => _achievements;
-  List<Map<String, dynamic>> get earnedAchievements => _earnedAchievements;
+
+  /// Returns the list of achievements that are unlocked for today only
+  List<Map<String, dynamic>> get earnedAchievements {
+    final today = _todayRecord;
+    if (today == null) return [];
+    final List<Map<String, dynamic>> unlocked = [];
+    for (final a in _achievements) {
+      if (a['id'] == 'gold_steps' && today.steps >= 10000) {
+        unlocked.add(a);
+      } else if (a['id'] == 'silver_steps' && today.steps >= 8000) {
+        unlocked.add(a);
+      } else if (a['id'] == 'bronze_steps' && today.steps >= 5000) {
+        unlocked.add(a);
+      } else if (a['id'] == 'hydration_hero' && today.water >= 2500) {
+        unlocked.add(a);
+      }
+    }
+    return unlocked;
+  }
 
   /// Load all records from database
   Future<void> loadRecords() async {
@@ -87,7 +104,6 @@ class HealthRecordProvider extends ChangeNotifier {
   Future<void> _loadAchievements() async {
     try {
       _achievements = await _repository.getAchievements();
-      _earnedAchievements = await _repository.getEarnedAchievements();
     } catch (e) {
       _setError('Failed to load achievements: $e');
     }
@@ -101,7 +117,6 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       await _repository.addRecord(record);
       await _repository.calculateAndUpdateStreak(record.date);
-      await _repository.checkAndUnlockAchievements(record.steps, record.water);
       await loadRecords(); // Reload all records
       return true;
     } catch (e) {
@@ -120,7 +135,6 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       await _repository.updateRecord(record);
       await _repository.calculateAndUpdateStreak(record.date);
-      await _repository.checkAndUnlockAchievements(record.steps, record.water);
       await loadRecords(); // Reload all records
       return true;
     } catch (e) {

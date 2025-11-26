@@ -752,121 +752,107 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               )
             else
-              Row(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Earned Achievements
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Unlocked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green[700], fontSize: 15)),
-                        const SizedBox(height: 8),
-                        if (earnedAchievements.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text('No badges yet.', style: TextStyle(color: Colors.grey[500], fontSize: 13)),
-                          )
-                        else
-                          GridView.count(
-                            crossAxisCount: 2,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            childAspectRatio: 1.7,
-                            children: earnedAchievements.map((achievement) {
-                              return Container(
-                                margin: const EdgeInsets.all(4),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber[50],
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.amber[200]!),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      achievement['name'],
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      achievement['description'],
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey[700],
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
+                  // Unlocked Achievements
+                  Text('Unlocked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green[700], fontSize: 15)),
+                  const SizedBox(height: 8),
+                  if (earnedAchievements.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text('No badges yet.', style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                    )
+                  else
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      childAspectRatio: 1.3,
+                      children: earnedAchievements.map((achievement) {
+                        return Container(
+                          margin: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.amber[50],
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.amber[200]!),
                           ),
-                      ],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                achievement['name'],
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                achievement['description'],
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[700],
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ),
-                  const SizedBox(width: 16),
+                  const SizedBox(height: 16),
                   // Locked Achievements
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Locked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700], fontSize: 15)),
-                        const SizedBox(height: 8),
-                        if (lockedAchievements.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text('All badges unlocked!', style: TextStyle(color: Colors.green[400], fontSize: 13)),
-                          )
-                        else
-                          GridView.count(
-                            crossAxisCount: 2,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            childAspectRatio: 1.7,
-                            children: lockedAchievements.map((achievement) {
-                              return Opacity(
-                                opacity: 0.5,
-                                child: Container(
-                                  margin: const EdgeInsets.all(4),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: Colors.grey[300]!),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        achievement['name'],
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        achievement['description'],
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey[600],
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
+                  Text('Locked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700], fontSize: 15)),
+                  const SizedBox(height: 8),
+                  if (lockedAchievements.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text('All badges unlocked!', style: TextStyle(color: Colors.green[400], fontSize: 13)),
+                    )
+                  else
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      childAspectRatio: 1.3,
+                      children: lockedAchievements.map((achievement) {
+                        return Opacity(
+                          opacity: 0.5,
+                          child: Container(
+                            margin: const EdgeInsets.all(4),
+                            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  achievement['name'],
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              );
-                            }).toList(),
+                                const SizedBox(height: 4),
+                                Text(
+                                  achievement['description'],
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[600],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                           ),
-                      ],
+                        );
+                      }).toList(),
                     ),
-                  ),
                 ],
               ),
           ],
