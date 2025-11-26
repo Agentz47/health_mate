@@ -431,55 +431,117 @@ class _DashboardPageState extends State<DashboardPage> {
       elevation: 4,
       child: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'Hydration Goal',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 20),
-            CircularPercentIndicator(
-              radius: 80,
-              lineWidth: 16,
-              percent: progress,
-              center: Column(
+            // Progress Ring
+            Expanded(
+              flex: 2,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    '$percentage%',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.waterColor,
+                    'Hydration Goal',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 20),
+                  CircularPercentIndicator(
+                    radius: 80,
+                    lineWidth: 16,
+                    percent: progress,
+                    center: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$percentage%',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.waterColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${provider.todayWater}/${provider.waterGoal}ml',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                    progressColor: AppTheme.waterColor,
+                    backgroundColor: Colors.grey[200]!,
+                    circularStrokeCap: CircularStrokeCap.round,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    progress >= 1.0
+                        ? '🎉 Goal achieved!'
+                        : 'Keep drinking! ${provider.waterGoal - provider.todayWater}ml to go',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 24),
+            // Quick Add Water Button
+            Expanded(
+              flex: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      // Quick add 250ml water
+                      final today = provider.todayRecord;
+                      if (today != null) {
+                        final updated = today.copyWith(water: today.water + 250);
+                        await provider.updateRecord(updated);
+                      }
+                    },
+                    icon: const Icon(Icons.water_drop),
+                    label: const Text('+250ml'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.waterColor,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(80, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 12),
                   Text(
-                    '${provider.todayWater}/${provider.waterGoal}ml',
+                    'Quick Add',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Hydration Tip
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Tip: Small, frequent sips keep you hydrated!',
+                      style: TextStyle(fontSize: 12, color: Colors.blue),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
               ),
-              progressColor: AppTheme.waterColor,
-              backgroundColor: Colors.grey[200]!,
-              circularStrokeCap: CircularStrokeCap.round,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              progress >= 1.0
-                  ? '🎉 Goal achieved!'
-                  : 'Keep drinking! ${provider.waterGoal - provider.todayWater}ml to go',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -652,6 +714,9 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildAchievementsCard(BuildContext context, HealthRecordProvider provider) {
     final earnedAchievements = provider.earnedAchievements;
+    final allAchievements = provider.achievements;
+    final earnedIds = earnedAchievements.map((a) => a['id']).toSet();
+    final lockedAchievements = allAchievements.where((a) => !earnedIds.contains(a['id'])).toList();
 
     return Card(
       elevation: 4,
@@ -673,7 +738,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
             const SizedBox(height: 16),
-            if (earnedAchievements.isEmpty)
+            if (allAchievements.isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
@@ -687,39 +752,122 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               )
             else
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: earnedAchievements.map((achievement) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber[50],
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.amber[200]!),
-                    ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Earned Achievements
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          achievement['name'],
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Text('Unlocked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green[700], fontSize: 15)),
+                        const SizedBox(height: 8),
+                        if (earnedAchievements.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Text('No badges yet.', style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                          )
+                        else
+                          GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            childAspectRatio: 1.7,
+                            children: earnedAchievements.map((achievement) {
+                              return Container(
+                                margin: const EdgeInsets.all(4),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber[50],
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.amber[200]!),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      achievement['name'],
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      achievement['description'],
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey[700],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          achievement['description'],
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[700],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
                       ],
                     ),
-                  );
-                }).toList(),
+                  ),
+                  const SizedBox(width: 16),
+                  // Locked Achievements
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Locked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700], fontSize: 15)),
+                        const SizedBox(height: 8),
+                        if (lockedAchievements.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Text('All badges unlocked!', style: TextStyle(color: Colors.green[400], fontSize: 13)),
+                          )
+                        else
+                          GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            childAspectRatio: 1.7,
+                            children: lockedAchievements.map((achievement) {
+                              return Opacity(
+                                opacity: 0.5,
+                                child: Container(
+                                  margin: const EdgeInsets.all(4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.grey[300]!),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        achievement['name'],
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        achievement['description'],
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[600],
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
           ],
         ),
