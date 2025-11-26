@@ -783,9 +783,11 @@ class _DashboardPageState extends State<DashboardPage> {
                             children: [
                               Text(
                                 achievement['name'],
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
+                                  
                                 ),
                               ),
                               const SizedBox(height: 4),
