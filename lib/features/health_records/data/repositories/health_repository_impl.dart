@@ -65,4 +65,33 @@ class HealthRepositoryImpl implements HealthRepository {
     final dateString = DateFormatter.formatForDatabase(entryDate);
     return await _databaseHelper.calculateAndUpdateStreak(dateString);
   }
+
+  // User settings methods
+  Future<int> getWaterGoal() async {
+    return await _databaseHelper.getWaterGoal();
+  }
+
+  Future<void> setWaterGoal(int goal) async {
+    await _databaseHelper.setWaterGoal(goal);
+  }
+
+  // Achievements methods
+  Future<List<Map<String, dynamic>>> getAchievements() async {
+    return await _databaseHelper.getAchievements();
+  }
+
+  Future<List<Map<String, dynamic>>> getEarnedAchievements() async {
+    return await _databaseHelper.getEarnedAchievements();
+  }
+
+  Future<void> checkAndUnlockAchievements(int steps, int water) async {
+    await _databaseHelper.checkAndUnlockAchievements(steps, water);
+  }
+
+  // Yesterday's data
+  Future<HealthRecord?> getYesterdayRecord() async {
+    final map = await _databaseHelper.getYesterdayRecord();
+    if (map == null) return null;
+    return HealthRecordModel.fromMap(map).toEntity();
+  }
 }

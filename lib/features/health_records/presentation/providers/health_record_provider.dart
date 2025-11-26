@@ -7,18 +7,26 @@ class HealthRecordProvider extends ChangeNotifier {
 
   List<HealthRecord> _records = [];
   HealthRecord? _todayRecord;
+  HealthRecord? _yesterdayRecord;
   bool _isLoading = false;
   String? _errorMessage;
   int _currentStreak = 0;
+  int _waterGoal = 2000;
+  List<Map<String, dynamic>> _achievements = [];
+  List<Map<String, dynamic>> _earnedAchievements = [];
 
   HealthRecordProvider(this._repository);
 
   // Getters
   List<HealthRecord> get records => _records;
   HealthRecord? get todayRecord => _todayRecord;
+  HealthRecord? get yesterdayRecord => _yesterdayRecord;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   int get currentStreak => _currentStreak;
+  int get waterGoal => _waterGoal;
+  List<Map<String, dynamic>> get achievements => _achievements;
+  List<Map<String, dynamic>> get earnedAchievements => _earnedAchievements;
 
   /// Load all records from database
   Future<void> loadRecords() async {
@@ -28,7 +36,10 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       _records = await _repository.getAllRecords();
       await _loadTodayRecord();
+      await _loadYesterdayRecord();
       await _loadStreak();
+      await _loadWaterGoal();
+      await _loadAchievements();
     } catch (e) {
       _setError('Failed to load records: $e');
     } finally {
@@ -54,6 +65,34 @@ class HealthRecordProvider extends ChangeNotifier {
     }
   }
 
+  /// Load yesterday's record
+  Future<void> _loadYesterdayRecord() async {
+    try {
+      _yesterdayRecord = await _repository.getYesterdayRecord();
+    } catch (e) {
+      // Not critical if yesterday's record doesn't exist
+    }
+  }
+
+  /// Load water goal
+  Future<void> _loadWaterGoal() async {
+    try {
+      _waterGoal = await _repository.getWaterGoal();
+    } catch (e) {
+      _setError('Failed to load water goal: $e');
+    }
+  }
+
+  /// Load achievements
+  Future<void> _loadAchievements() async {
+    try {
+      _achievements = await _repository.getAchievements();
+      _earnedAchievements = await _repository.getEarnedAchievements();
+    } catch (e) {
+      _setError('Failed to load achievements: $e');
+    }
+  }
+
   /// Add a new health record
   Future<bool> addRecord(HealthRecord record) async {
     _setLoading(true);
@@ -62,6 +101,7 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       await _repository.addRecord(record);
       await _repository.calculateAndUpdateStreak(record.date);
+      await _repository.checkAndUnlockAchievements(record.steps, record.water);
       await loadRecords(); // Reload all records
       return true;
     } catch (e) {
@@ -80,6 +120,7 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       await _repository.updateRecord(record);
       await _repository.calculateAndUpdateStreak(record.date);
+      await _repository.checkAndUnlockAchievements(record.steps, record.water);
       await loadRecords(); // Reload all records
       return true;
     } catch (e) {
@@ -141,6 +182,75 @@ class HealthRecordProvider extends ChangeNotifier {
     if (_currentStreak < 30) return 'Amazing streak!';
     if (_currentStreak < 100) return 'Unstoppable!';
     return 'Legendary streak!';
+  }
+
+  /// Get water progress percentage
+  double getWaterProgress() {
+    if (_waterGoal == 0) return 0.0;
+    final progress = todayWater / _waterGoal;
+    return progress > 1.0 ? 1.0 : progress;
+  }
+
+  /// Get smart insights based on today's data
+  List<String> getSmartInsights() {
+    final insights = <String>[];
+
+    // Steps insights
+    if (todaySteps < 3000) {
+      insights.add('Try to move more tomorrow 🏃');
+    } else if (todaySteps >= 10000) {
+      insights.add('Fantastic! You hit 10,000 steps! 🎉');
+    } else if (todaySteps >= 5000) {
+      insights.add('Good progress on steps today! 👟');
+    }
+
+    // Water insights
+    if (todayWater >= _waterGoal) {
+      insights.add('Great job staying hydrated 💧');
+    } else if (todayWater < _waterGoal / 2) {
+      insights.add('Drink more water today! 🚰');
+    }
+
+    // Comparison insights
+    if (_yesterdayRecord != null) {
+      if (todaySteps > _yesterdayRecord!.steps) {
+        insights.add('More active than yesterday! 📈');
+      }
+      if (todayWater > _yesterdayRecord!.water) {
+        insights.add('Better hydration than yesterday! 💪');
+      }
+    }
+
+    return insights.isEmpty ? ['Keep tracking your health daily! 📊'] : insights;
+  }
+
+  /// Get comparison data for today vs yesterday
+  Map<String, Map<String, dynamic>> getComparisonData() {
+    if (_yesterdayRecord == null) {
+      return {
+        'steps': {'today': todaySteps, 'yesterday': 0, 'change': todaySteps},
+        'water': {'today': todayWater, 'yesterday': 0, 'change': todayWater},
+        'calories': {'today': todayCalories, 'yesterday': 0, 'change': todayCalories},
+      };
+    }
+
+    return {
+      'steps': {
+        'today': todaySteps,
+        'yesterday': _yesterdayRecord!.steps,
+        'change': todaySteps - _yesterdayRecord!.steps,
+      },
+      'water': {
+        'today': todayWater,
+        'yesterday': _yesterdayRecord!.water,
+        'change': todayWater - _yesterdayRecord!.water,
+      },
+      'calories': {
+        'today': todayCalories,
+        'yesterday': _yesterdayRecord!.calories,
+        'change': todayCalories - _yesterdayRecord!.calories,
+      },
+    };
   }
 
   // Private helper methods

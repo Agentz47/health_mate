@@ -50,6 +50,34 @@ class DatabaseHelper {
     await db.insert('app_metadata', {'key': 'current_streak', 'value': '0'});
     await db.insert('app_metadata', {'key': 'last_entry_date', 'value': ''});
 
+    // Create user settings table
+    await db.execute('''
+      CREATE TABLE ${AppConstants.userSettingsTable} (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    ''');
+
+    // Initialize default water goal
+    await db.insert(AppConstants.userSettingsTable, {
+      'key': 'water_goal',
+      'value': AppConstants.defaultWaterGoal.toString()
+    });
+
+    // Create achievements table
+    await db.execute('''
+      CREATE TABLE ${AppConstants.achievementsTable} (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        earned_date TEXT,
+        is_earned INTEGER DEFAULT 0
+      )
+    ''');
+
+    // Insert achievement definitions
+    await _insertAchievements(db);
+
     // Insert dummy records for testing
     await _insertDummyData(db);
   }
@@ -67,6 +95,36 @@ class DatabaseHelper {
       // Initialize streak data
       await db.insert('app_metadata', {'key': 'current_streak', 'value': '0'});
       await db.insert('app_metadata', {'key': 'last_entry_date', 'value': ''});
+    }
+
+    if (oldVersion < 3) {
+      // Add user settings table
+      await db.execute('''
+        CREATE TABLE ${AppConstants.userSettingsTable} (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL
+        )
+      ''');
+
+      // Initialize default water goal
+      await db.insert(AppConstants.userSettingsTable, {
+        'key': 'water_goal',
+        'value': AppConstants.defaultWaterGoal.toString()
+      });
+
+      // Add achievements table
+      await db.execute('''
+        CREATE TABLE ${AppConstants.achievementsTable} (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT NOT NULL,
+          earned_date TEXT,
+          is_earned INTEGER DEFAULT 0
+        )
+      ''');
+
+      // Insert achievement definitions
+      await _insertAchievements(db);
     }
   }
 
@@ -119,6 +177,43 @@ class DatabaseHelper {
 
     for (var record in dummyRecords) {
       await db.insert(AppConstants.healthRecordsTable, record);
+    }
+  }
+
+  Future<void> _insertAchievements(Database db) async {
+    final achievements = [
+      {
+        'id': 'bronze_steps',
+        'name': '🥉 Bronze Steps',
+        'description': 'Walk ${AppConstants.bronzeSteps} steps in a day',
+        'earned_date': null,
+        'is_earned': 0,
+      },
+      {
+        'id': 'silver_steps',
+        'name': '🥈 Silver Steps',
+        'description': 'Walk ${AppConstants.silverSteps} steps in a day',
+        'earned_date': null,
+        'is_earned': 0,
+      },
+      {
+        'id': 'gold_steps',
+        'name': '🥇 Gold Steps',
+        'description': 'Walk ${AppConstants.goldSteps} steps in a day',
+        'earned_date': null,
+        'is_earned': 0,
+      },
+      {
+        'id': 'hydration_hero',
+        'name': '💧 Hydration Hero',
+        'description': 'Drink ${AppConstants.hydrationHeroWater}ml water in a day',
+        'earned_date': null,
+        'is_earned': 0,
+      },
+    ];
+
+    for (var achievement in achievements) {
+      await db.insert(AppConstants.achievementsTable, achievement);
     }
   }
 
@@ -245,5 +340,80 @@ class DatabaseHelper {
       orderBy: 'date DESC',
     );
     return result.map((row) => row['date'] as String).toList();
+  }
+
+  // User Settings methods
+  Future<int> getWaterGoal() async {
+    final db = await database;
+    final result = await db.query(
+      AppConstants.userSettingsTable,
+      where: 'key = ?',
+      whereArgs: ['water_goal'],
+    );
+    if (result.isEmpty) return AppConstants.defaultWaterGoal;
+    return int.tryParse(result.first['value'] as String) ?? AppConstants.defaultWaterGoal;
+  }
+
+  Future<void> setWaterGoal(int goal) async {
+    final db = await database;
+    await db.update(
+      AppConstants.userSettingsTable,
+      {'value': goal.toString()},
+      where: 'key = ?',
+      whereArgs: ['water_goal'],
+    );
+  }
+
+  // Achievements methods
+  Future<List<Map<String, dynamic>>> getAchievements() async {
+    final db = await database;
+    return await db.query(AppConstants.achievementsTable);
+  }
+
+  Future<List<Map<String, dynamic>>> getEarnedAchievements() async {
+    final db = await database;
+    return await db.query(
+      AppConstants.achievementsTable,
+      where: 'is_earned = ?',
+      whereArgs: [1],
+    );
+  }
+
+  Future<void> unlockAchievement(String achievementId) async {
+    final db = await database;
+    await db.update(
+      AppConstants.achievementsTable,
+      {
+        'is_earned': 1,
+        'earned_date': DateFormatter.formatForDatabase(DateTime.now()),
+      },
+      where: 'id = ? AND is_earned = 0',
+      whereArgs: [achievementId],
+    );
+  }
+
+  Future<void> checkAndUnlockAchievements(int steps, int water) async {
+    if (steps >= AppConstants.goldSteps) {
+      await unlockAchievement('gold_steps');
+      await unlockAchievement('silver_steps');
+      await unlockAchievement('bronze_steps');
+    } else if (steps >= AppConstants.silverSteps) {
+      await unlockAchievement('silver_steps');
+      await unlockAchievement('bronze_steps');
+    } else if (steps >= AppConstants.bronzeSteps) {
+      await unlockAchievement('bronze_steps');
+    }
+
+    if (water >= AppConstants.hydrationHeroWater) {
+      await unlockAchievement('hydration_hero');
+    }
+  }
+
+  // Yesterday's data for comparison
+  Future<Map<String, dynamic>?> getYesterdayRecord() async {
+    final yesterday = DateTime.now().subtract(const Duration(days: 1));
+    final dateString = DateFormatter.formatForDatabase(yesterday);
+    final results = await queryByDate(dateString);
+    return results.isNotEmpty ? results.first : null;
   }
 }
