@@ -95,6 +95,10 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   const SizedBox(height: 24),
 
+                  // Streak Card - Featured prominently
+                  _buildStreakCard(context, provider),
+                  const SizedBox(height: 24),
+
                   // Summary Cards
                   _buildSummaryCard(
                     context,
@@ -164,6 +168,87 @@ class _DashboardPageState extends State<DashboardPage> {
         },
         icon: const Icon(Icons.add),
         label: const Text('Add Record'),
+      ),
+    );
+  }
+
+  Widget _buildStreakCard(BuildContext context, HealthRecordProvider provider) {
+    final streak = provider.currentStreak;
+    final message = provider.getStreakMessage();
+
+    return Card(
+      elevation: 6,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: [
+              Colors.deepOrange.withOpacity(0.7),
+              Colors.orange.withOpacity(0.5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '🔥',
+                  style: TextStyle(
+                    fontSize: streak > 0 ? 48 : 32,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      streak > 0 ? '$streak-Day Streak!' : 'No Streak Yet',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      message,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            if (streak > 0) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Daily entries recorded',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

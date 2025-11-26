@@ -1,8 +1,9 @@
 class AppConstants {
   // Database
   static const String databaseName = 'health_mate.db';
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2; // Incremented for streak metadata table
   static const String healthRecordsTable = 'health_records';
+  static const String metadataTable = 'app_metadata';
 
   // Colors
   static const String waterColorHex = '#2196F3';

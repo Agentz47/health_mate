@@ -23,6 +23,7 @@ class DatabaseHelper {
       path,
       version: AppConstants.databaseVersion,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -37,8 +38,36 @@ class DatabaseHelper {
       )
     ''');
 
+    // Create metadata table for streak tracking
+    await db.execute('''
+      CREATE TABLE app_metadata (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    ''');
+
+    // Initialize streak data
+    await db.insert('app_metadata', {'key': 'current_streak', 'value': '0'});
+    await db.insert('app_metadata', {'key': 'last_entry_date', 'value': ''});
+
     // Insert dummy records for testing
     await _insertDummyData(db);
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add metadata table for streak tracking
+      await db.execute('''
+        CREATE TABLE app_metadata (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL
+        )
+      ''');
+
+      // Initialize streak data
+      await db.insert('app_metadata', {'key': 'current_streak', 'value': '0'});
+      await db.insert('app_metadata', {'key': 'last_entry_date', 'value': ''});
+    }
   }
 
   Future<void> _insertDummyData(Database db) async {
@@ -138,5 +167,83 @@ class DatabaseHelper {
   Future<void> close() async {
     final db = await database;
     await db.close();
+  }
+
+  // Streak tracking methods
+  Future<int> getCurrentStreak() async {
+    final db = await database;
+    final result = await db.query(
+      'app_metadata',
+      where: 'key = ?',
+      whereArgs: ['current_streak'],
+    );
+    if (result.isEmpty) return 0;
+    return int.tryParse(result.first['value'] as String) ?? 0;
+  }
+
+  Future<String> getLastEntryDate() async {
+    final db = await database;
+    final result = await db.query(
+      'app_metadata',
+      where: 'key = ?',
+      whereArgs: ['last_entry_date'],
+    );
+    if (result.isEmpty) return '';
+    return result.first['value'] as String;
+  }
+
+  Future<void> updateStreak(int streak, String lastDate) async {
+    final db = await database;
+    await db.update(
+      'app_metadata',
+      {'value': streak.toString()},
+      where: 'key = ?',
+      whereArgs: ['current_streak'],
+    );
+    await db.update(
+      'app_metadata',
+      {'value': lastDate},
+      where: 'key = ?',
+      whereArgs: ['last_entry_date'],
+    );
+  }
+
+  Future<int> calculateAndUpdateStreak(String newEntryDate) async {
+    final lastDate = await getLastEntryDate();
+    int currentStreak = await getCurrentStreak();
+
+    if (lastDate.isEmpty) {
+      // First entry ever
+      currentStreak = 1;
+    } else {
+      final lastEntry = DateFormatter.parseFromDatabase(lastDate);
+      final newEntry = DateFormatter.parseFromDatabase(newEntryDate);
+      final difference = newEntry.difference(lastEntry).inDays;
+
+      if (difference == 1) {
+        // Consecutive day - increment streak
+        currentStreak++;
+      } else if (difference == 0) {
+        // Same day - keep streak (updating existing entry)
+        // Do nothing
+      } else {
+        // Missed day(s) - reset streak
+        currentStreak = 1;
+      }
+    }
+
+    await updateStreak(currentStreak, newEntryDate);
+    return currentStreak;
+  }
+
+  Future<List<String>> getAllUniqueDates() async {
+    final db = await database;
+    final result = await db.query(
+      AppConstants.healthRecordsTable,
+      columns: ['date'],
+      distinct: true,
+      orderBy: 'date DESC',
+    );
+    return result.map((row) => row['date'] as String).toList();
   }
 }

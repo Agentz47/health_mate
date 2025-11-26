@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/health_record.dart';
-import '../../domain/repositories/health_repository.dart';
+import '../../data/repositories/health_repository_impl.dart';
 
 class HealthRecordProvider extends ChangeNotifier {
-  final HealthRepository _repository;
+  final HealthRepositoryImpl _repository;
 
   List<HealthRecord> _records = [];
   HealthRecord? _todayRecord;
   bool _isLoading = false;
   String? _errorMessage;
+  int _currentStreak = 0;
 
   HealthRecordProvider(this._repository);
 
@@ -17,6 +18,7 @@ class HealthRecordProvider extends ChangeNotifier {
   HealthRecord? get todayRecord => _todayRecord;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  int get currentStreak => _currentStreak;
 
   /// Load all records from database
   Future<void> loadRecords() async {
@@ -26,6 +28,7 @@ class HealthRecordProvider extends ChangeNotifier {
     try {
       _records = await _repository.getAllRecords();
       await _loadTodayRecord();
+      await _loadStreak();
     } catch (e) {
       _setError('Failed to load records: $e');
     } finally {
@@ -42,6 +45,15 @@ class HealthRecordProvider extends ChangeNotifier {
     }
   }
 
+  /// Load current streak
+  Future<void> _loadStreak() async {
+    try {
+      _currentStreak = await _repository.getCurrentStreak();
+    } catch (e) {
+      _setError('Failed to load streak: $e');
+    }
+  }
+
   /// Add a new health record
   Future<bool> addRecord(HealthRecord record) async {
     _setLoading(true);
@@ -49,6 +61,7 @@ class HealthRecordProvider extends ChangeNotifier {
 
     try {
       await _repository.addRecord(record);
+      await _repository.calculateAndUpdateStreak(record.date);
       await loadRecords(); // Reload all records
       return true;
     } catch (e) {
@@ -66,6 +79,7 @@ class HealthRecordProvider extends ChangeNotifier {
 
     try {
       await _repository.updateRecord(record);
+      await _repository.calculateAndUpdateStreak(record.date);
       await loadRecords(); // Reload all records
       return true;
     } catch (e) {
@@ -118,6 +132,16 @@ class HealthRecordProvider extends ChangeNotifier {
 
   /// Calculate total water for today
   int get todayWater => _todayRecord?.water ?? 0;
+
+  /// Get motivational message based on streak
+  String getStreakMessage() {
+    if (_currentStreak == 0) return 'Start your streak today!';
+    if (_currentStreak == 1) return 'Great start! Keep going!';
+    if (_currentStreak < 7) return 'Keep it going!';
+    if (_currentStreak < 30) return 'Amazing streak!';
+    if (_currentStreak < 100) return 'Unstoppable!';
+    return 'Legendary streak!';
+  }
 
   // Private helper methods
   void _setLoading(bool value) {

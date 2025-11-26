@@ -55,4 +55,14 @@ class HealthRepositoryImpl implements HealthRepository {
     final records = await getRecordsByDate(date);
     return records.isNotEmpty;
   }
+
+  // Streak tracking methods
+  Future<int> getCurrentStreak() async {
+    return await _databaseHelper.getCurrentStreak();
+  }
+
+  Future<int> calculateAndUpdateStreak(DateTime entryDate) async {
+    final dateString = DateFormatter.formatForDatabase(entryDate);
+    return await _databaseHelper.calculateAndUpdateStreak(dateString);
+  }
 }
