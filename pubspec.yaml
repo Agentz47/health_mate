@@ -47,6 +47,11 @@ dependencies:
   
   # Circular Progress Indicators
   percent_indicator: ^4.2.3
+  
+  # Step Counter & Permissions
+  pedometer: ^4.0.1
+  shared_preferences: ^2.2.2
+  permission_handler: ^11.1.0
 
 dev_dependencies:
   flutter_test:

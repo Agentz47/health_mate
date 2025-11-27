@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMotionUsageDescription</key>
+	<string>HealthMate needs access to motion data to track your daily steps.</string>
 </dict>
 </plist>

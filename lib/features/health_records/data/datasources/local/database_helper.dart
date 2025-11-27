@@ -416,4 +416,35 @@ class DatabaseHelper {
     final results = await queryByDate(dateString);
     return results.isNotEmpty ? results.first : null;
   }
+
+  // Upsert today's step count (for step counter provider)
+  Future<void> upsertTodaySteps({required String dateString, required int steps}) async {
+    final db = await database;
+    final existing = await db.query(
+      AppConstants.healthRecordsTable,
+      where: 'date = ?',
+      whereArgs: [dateString],
+    );
+
+    if (existing.isNotEmpty) {
+      // Update existing record with new step count
+      await db.update(
+        AppConstants.healthRecordsTable,
+        {'steps': steps},
+        where: 'date = ?',
+        whereArgs: [dateString],
+      );
+    } else {
+      // Insert new record with steps, calories=0, water=0
+      await db.insert(
+        AppConstants.healthRecordsTable,
+        {
+          'date': dateString,
+          'steps': steps,
+          'calories': 0,
+          'water': 0,
+        },
+      );
+    }
+  }
 }

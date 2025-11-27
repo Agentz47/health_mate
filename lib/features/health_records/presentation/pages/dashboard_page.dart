@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import '../providers/health_record_provider.dart';
+import '../providers/optimized_step_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/date_formatter.dart';
 import 'records_list_page.dart';
@@ -100,6 +101,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   _buildStreakCard(context, provider),
                   const SizedBox(height: 16),
                   _buildHydrationGoalCard(context, provider),
+                  const SizedBox(height: 16),
+                  _buildLiveStepCounterCard(context),
                   const SizedBox(height: 24),
 
                   // SECTION 2: Today's Metrics (3 Cards in Grid)
@@ -205,6 +208,193 @@ class _DashboardPageState extends State<DashboardPage> {
         icon: const Icon(Icons.add),
         label: const Text('Add Record'),
       ),
+    );
+  }
+
+  Widget _buildLiveStepCounterCard(BuildContext context) {
+    return Consumer<OptimizedStepProvider>(
+      builder: (context, stepProvider, child) {
+        return Card(
+          elevation: 4,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.stepsColor.withOpacity(0.15),
+                  AppTheme.stepsColor.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.stepsColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.directions_walk,
+                        size: 32,
+                        color: AppTheme.stepsColor,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Live Step Counter',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            stepProvider.isListening
+                                ? 'Real-time tracking'
+                                : stepProvider.hasPermission
+                                    ? 'Sensor unavailable'
+                                    : 'Permission needed',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '${stepProvider.liveSteps}',
+                  style: TextStyle(
+                    fontSize: 56,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.stepsColor,
+                    letterSpacing: -2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'steps today',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (!stepProvider.hasPermission)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.orange[200]!,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.warning_amber,
+                          size: 18,
+                          color: Colors.orange[700],
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Enable Activity Recognition in Settings',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.orange[900],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (!stepProvider.isListening)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.sensors_off,
+                          size: 18,
+                          color: Colors.grey[600],
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Step sensor not available',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Live tracking active',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.green[900],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

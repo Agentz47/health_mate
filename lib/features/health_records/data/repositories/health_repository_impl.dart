@@ -94,4 +94,9 @@ class HealthRepositoryImpl implements HealthRepository {
     if (map == null) return null;
     return HealthRecordModel.fromMap(map).toEntity();
   }
+
+  @override
+  Future<void> upsertTodaySteps({required String dateString, required int steps}) async {
+    await _databaseHelper.upsertTodaySteps(dateString: dateString, steps: steps);
+  }
 }

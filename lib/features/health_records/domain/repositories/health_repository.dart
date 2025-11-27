@@ -21,4 +21,7 @@ abstract class HealthRepository {
 
   /// Check if a record exists for a specific date
   Future<bool> hasRecordForDate(DateTime date);
+
+  /// Upsert today's step count (update if exists, insert if not)
+  Future<void> upsertTodaySteps({required String dateString, required int steps});
 }

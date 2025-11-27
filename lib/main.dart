@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'features/health_records/data/datasources/local/database_helper.dart';
 import 'features/health_records/data/repositories/health_repository_impl.dart';
 import 'features/health_records/presentation/providers/health_record_provider.dart';
+import 'features/health_records/presentation/providers/optimized_step_provider.dart';
 import 'features/health_records/presentation/pages/dashboard_page.dart';
 
 void main() {
@@ -15,10 +16,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => HealthRecordProvider(
-        HealthRepositoryImpl(DatabaseHelper.instance),
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => HealthRecordProvider(
+            HealthRepositoryImpl(DatabaseHelper.instance),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => OptimizedStepProvider(
+            HealthRepositoryImpl(DatabaseHelper.instance),
+          ),
+        ),
+      ],
       child: MaterialApp(
         title: 'HealthMate',
         debugShowCheckedModeBanner: false,
