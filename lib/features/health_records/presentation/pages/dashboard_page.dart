@@ -4,6 +4,8 @@ import 'package:percent_indicator/percent_indicator.dart';
 import '../providers/health_record_provider.dart';
 import '../providers/optimized_step_provider.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/theme_toggle.dart';
 import '../../../../core/utils/date_formatter.dart';
 import 'records_list_page.dart';
 import 'add_edit_record_page.dart';
@@ -23,192 +25,6 @@ class _DashboardPageState extends State<DashboardPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<HealthRecordProvider>().loadRecords();
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('HealthMate'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.list),
-            tooltip: 'View All Records',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const RecordsListPage(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<HealthRecordProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (provider.errorMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    provider.errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => provider.loadRecords(),
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () => provider.loadRecords(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Today's Date Header
-                  Text(
-                    DateFormatter.formatForDisplay(DateTime.now()),
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Today's Summary",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.grey[600],
-                        ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // SECTION 1: Streak & Goal Progress
-                  _buildStreakCard(context, provider),
-                  const SizedBox(height: 16),
-                  _buildHydrationGoalCard(context, provider),
-                  const SizedBox(height: 16),
-                  _buildLiveStepCounterCard(context),
-                  const SizedBox(height: 24),
-
-                  // SECTION 2: Today's Metrics (3 Cards in Grid)
-                  Text(
-                    'Today\'s Metrics',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildCompactMetricCard(
-                          context,
-                          icon: Icons.directions_walk,
-                          title: 'Steps',
-                          value: provider.todaySteps.toString(),
-                          color: AppTheme.stepsColor,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildCompactMetricCard(
-                          context,
-                          icon: Icons.local_fire_department,
-                          title: 'Calories',
-                          value: provider.todayCalories.toString(),
-                          color: AppTheme.caloriesColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSummaryCard(
-                    context,
-                    icon: Icons.water_drop,
-                    title: 'Water Intake',
-                    value: '${provider.todayWater} ml',
-                    color: AppTheme.waterColor,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // SECTION 3: Insights & Comparison
-                  Text(
-                    'Insights & Analysis',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSmartInsightsCard(context, provider),
-                  const SizedBox(height: 16),
-                  _buildComparisonCard(context, provider),
-                  const SizedBox(height: 24),
-
-                  // SECTION 4: Achievements
-                  _buildAchievementsCard(context, provider),
-                  const SizedBox(height: 24),
-
-                  // SECTION 5: Quick Stats
-                  Text(
-                    'Quick Stats',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildStatRow(
-                            'Total Records',
-                            provider.records.length.toString(),
-                          ),
-                          const Divider(),
-                          _buildStatRow(
-                            'This Week',
-                            _getWeekRecordsCount(provider).toString(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddEditRecordPage(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Add Record'),
-      ),
-    );
   }
 
   Widget _buildLiveStepCounterCard(BuildContext context) {
@@ -688,6 +504,20 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Hydration Tip
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.water2Color,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Tip: Small, frequent sips keep you hydrated!',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                 const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: () async {
                       // Quick add 250ml water
@@ -698,36 +528,27 @@ class _DashboardPageState extends State<DashboardPage> {
                       }
                     },
                     icon: const Icon(Icons.water_drop),
-                    label: const Text('+250ml'),
+                    label: const Text('+250ml',
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.waterColor,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppTheme.water2Color,
+                      foregroundColor: Colors.blue,
                       minimumSize: const Size(80, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 5),
                   Text(
                     'Quick Add',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Hydration Tip
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Tip: Small, frequent sips keep you hydrated!',
-                      style: TextStyle(fontSize: 12, color: Colors.blue),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
@@ -789,7 +610,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Card(
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(13),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -802,19 +623,29 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 16),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Table(
-                border: TableBorder.all(color: Colors.grey[300]!, width: 1),
-                defaultColumnWidth: const IntrinsicColumnWidth(),
-                children: [
-                  TableRow(
-                    decoration: BoxDecoration(color: Colors.grey[100]),
+              child: Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Table(
+                    border: TableBorder.all(
+                      color: isDark ? AppColors.darkBorder : Colors.grey[300]!,
+                      width: 1,
+                    ),
+                    defaultColumnWidth: const IntrinsicColumnWidth(),
                     children: [
-                      _buildTableHeader('Metric'),
-                      _buildTableHeader('Today'),
-                      _buildTableHeader('Yesterday'),
-                      _buildTableHeader('Change'),
-                    ],
-                  ),
+                      TableRow(
+                        decoration: BoxDecoration(
+                          color: isDark 
+                              ? AppColors.darkPrimary.withOpacity(0.2)
+                              : Colors.grey[100],
+                        ),
+                        children: [
+                          _buildTableHeader('Metric'),
+                          _buildTableHeader('Today'),
+                          _buildTableHeader('Yesterday'),
+                          _buildTableHeader('Change'),
+                        ],
+                      ),
                   _buildComparisonRow(
                     'Steps',
                     comparison['steps']!['today'].toString(),
@@ -833,7 +664,9 @@ class _DashboardPageState extends State<DashboardPage> {
                     comparison['calories']!['yesterday'].toString(),
                     comparison['calories']!['change'],
                   ),
-                ],
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -946,7 +779,19 @@ class _DashboardPageState extends State<DashboardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Unlocked Achievements
-                  Text('Unlocked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green[700], fontSize: 15)),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return Text(
+                        'Unlocked',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.darkSuccess : Colors.green[700],
+                          fontSize: 15,
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 8),
                   if (earnedAchievements.isEmpty)
                     Padding(
@@ -975,6 +820,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 achievement['name'],
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
+                                  color: Colors.amber,
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
                                   
@@ -996,7 +842,19 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   const SizedBox(height: 16),
                   // Locked Achievements
-                  Text('Locked', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700], fontSize: 15)),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return Text(
+                        'Locked',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? AppColors.darkTextPrimary : Colors.grey[700],
+                          fontSize: 15,
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 8),
                   if (lockedAchievements.isEmpty)
                     Padding(
@@ -1025,8 +883,10 @@ class _DashboardPageState extends State<DashboardPage> {
                               children: [
                                 Text(
                                   achievement['name'],
+                                  textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontSize: 15,
+                                    color: Colors.black87,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -1035,7 +895,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   achievement['description'],
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey[600],
+                                    color: Colors.grey[900],
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -1049,6 +909,193 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GradientScaffold(
+      appBar: AppBar(
+        title: const Text('HealthMate'),
+        actions: [
+          const ThemeToggle(),
+          IconButton(
+            icon: const Icon(Icons.list),
+            tooltip: 'View All Records',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RecordsListPage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Consumer<HealthRecordProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    provider.errorMessage!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => provider.loadRecords(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => provider.loadRecords(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Today's Date Header
+                  Text(
+                    DateFormatter.formatForDisplay(DateTime.now()),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Today's Summary",
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // SECTION 1: Streak & Goal Progress
+                  _buildStreakCard(context, provider),
+                  const SizedBox(height: 16),
+                  _buildHydrationGoalCard(context, provider),
+                  const SizedBox(height: 16),
+                  _buildLiveStepCounterCard(context),
+                  const SizedBox(height: 24),
+
+                  // SECTION 2: Today's Metrics (3 Cards in Grid)
+                  Text(
+                    'Today\'s Metrics',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildCompactMetricCard(
+                          context,
+                          icon: Icons.directions_walk,
+                          title: 'Steps',
+                          value: provider.todaySteps.toString(),
+                          color: AppTheme.stepsColor,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildCompactMetricCard(
+                          context,
+                          icon: Icons.local_fire_department,
+                          title: 'Calories',
+                          value: provider.todayCalories.toString(),
+                          color: AppTheme.caloriesColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSummaryCard(
+                    context,
+                    icon: Icons.water_drop,
+                    title: 'Water Intake',
+                    value: '${provider.todayWater} ml',
+                    color: AppTheme.waterColor,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // SECTION 3: Insights & Comparison
+                  Text(
+                    'Insights & Analysis',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSmartInsightsCard(context, provider),
+                  const SizedBox(height: 16),
+                  _buildComparisonCard(context, provider),
+                  const SizedBox(height: 24),
+
+                  // SECTION 4: Achievements
+                  _buildAchievementsCard(context, provider),
+                  const SizedBox(height: 24),
+
+                  // SECTION 5: Quick Stats
+                  Text(
+                    'Quick Stats',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          _buildStatRow(
+                            'Total Records',
+                            provider.records.length.toString(),
+                          ),
+                          const Divider(),
+                          _buildStatRow(
+                            'This Week',
+                            _getWeekRecordsCount(provider).toString(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 80),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddEditRecordPage(),
+            ),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Add Record'),
       ),
     );
   }

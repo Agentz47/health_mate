@@ -18,7 +18,7 @@ class _RecordsListPageState extends State<RecordsListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(
         title: const Text('Health Records'),
         actions: [

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_gradients.dart';
 import '../../domain/entities/user_profile.dart';
 import '../providers/user_profile_provider.dart';
 import 'greeting_page.dart';
@@ -149,7 +152,9 @@ class _WelcomePageState extends State<WelcomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return GradientScaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -160,31 +165,56 @@ class _WelcomePageState extends State<WelcomePage> {
               children: [
                 const SizedBox(height: 40),
                 
-                // Welcome Header
-                const Icon(
-                  Icons.favorite,
-                  size: 80,
-                  color: Colors.red,
-                ),
-                const SizedBox(height: 24),
-                
-                Text(
-                  'Welcome to HealthMate',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                // Welcome Header with gradient background
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: AppGradients.getCard(isDark),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark ? AppColors.darkCardShadow : AppColors.lightCardShadow,
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                
-                Text(
-                  'Let\'s personalize your health journey',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: AppGradients.getPrimaryButton(isDark),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.favorite,
+                          size: 50,
+                          color: Colors.white,
+                        ),
                       ),
-                  textAlign: TextAlign.center,
+                      const SizedBox(height: 16),
+                      
+                      Text(
+                        'Welcome to HealthMate',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      Text(
+                        'Let\'s personalize your health journey',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AppColors.getTextSecondary(isDark),
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
                 // Name Field
                 TextFormField(
@@ -302,20 +332,25 @@ class _WelcomePageState extends State<WelcomePage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.blue[50],
+                    color: isDark ? AppColors.darkSurface : Colors.blue[50],
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue[200]!),
+                    border: Border.all(
+                      color: isDark ? AppColors.darkPrimary : Colors.blue[200]!,
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Colors.blue[700]),
+                      Icon(
+                        Icons.info_outline,
+                        color: isDark ? AppColors.darkPrimary : Colors.blue[700],
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'All fields are optional. Providing your weight helps us give you more accurate calorie estimates.',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.blue[900],
+                            color: AppColors.getTextPrimary(isDark),
                           ),
                         ),
                       ),
@@ -324,15 +359,10 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 const SizedBox(height: 32),
 
-                // Save Button
-                ElevatedButton(
+                // Save Button with Gradient
+                GradientButton(
                   onPressed: _isLoading ? null : _saveAndContinue,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  gradient: AppGradients.getPrimaryButton(isDark),
                   child: _isLoading
                       ? const SizedBox(
                           height: 20,
@@ -344,7 +374,11 @@ class _WelcomePageState extends State<WelcomePage> {
                         )
                       : const Text(
                           'Save & Be Active',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                 ),
                 const SizedBox(height: 12),

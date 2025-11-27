@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/health_record_provider.dart';
 import '../../domain/entities/health_record.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/constants/app_constants.dart';
 
@@ -49,7 +50,7 @@ class _AddEditRecordPageState extends State<AddEditRecordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(
         title: Text(isEditing ? 'Edit Record' : 'Add Record'),
       ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_gradients.dart';
 import '../providers/user_profile_provider.dart';
 import 'welcome_page.dart';
 import '../../../health_records/presentation/pages/dashboard_page.dart';
@@ -9,7 +12,9 @@ class GreetingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return GradientScaffold(
       body: SafeArea(
         child: Consumer<UserProfileProvider>(
           builder: (context, provider, child) {
@@ -32,20 +37,20 @@ class GreetingPage extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.red.withOpacity(0.2),
-                            Colors.pink.withOpacity(0.1),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        gradient: AppGradients.getPrimaryButton(isDark),
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: (isDark ? AppColors.darkPrimary : AppColors.lightPrimary).withOpacity(0.4),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: const Icon(
                         Icons.favorite,
                         size: 60,
-                        color: Colors.red,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -55,7 +60,7 @@ class GreetingPage extends StatelessWidget {
                   Text(
                     'Welcome back,',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.getTextSecondary(isDark),
                           fontWeight: FontWeight.w500,
                         ),
                     textAlign: TextAlign.center,
@@ -73,39 +78,35 @@ class GreetingPage extends StatelessWidget {
 
                   // Profile Details Card
                   if (profile?.hasAnyData ?? false) ...[
-                    Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.person_outline,
-                                  color: Colors.grey[700],
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Your Profile',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            _buildProfileTiles(context, profile),
-                          ],
-                        ),
+                    GradientCard(
+                      gradient: AppGradients.getCard(isDark),
+                      padding: const EdgeInsets.all(20),
+                      margin: EdgeInsets.zero,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.person_outline,
+                                color: AppColors.getPrimary(isDark),
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Your Profile',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildProfileTiles(context, profile, isDark),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -115,20 +116,31 @@ class GreetingPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue[50],
+                      color: isDark 
+                          ? AppColors.darkSurface 
+                          : Colors.blue[50],
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue[200]!),
+                      border: Border.all(
+                        color: isDark 
+                            ? AppColors.darkPrimary 
+                            : Colors.blue[200]!,
+                      ),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.tips_and_updates, color: Colors.blue[700]),
+                        Icon(
+                          Icons.tips_and_updates,
+                          color: isDark 
+                              ? AppColors.darkPrimary 
+                              : Colors.blue[700],
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Ready to track your health journey today?',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.blue[900],
+                              color: AppColors.getTextPrimary(isDark),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -139,26 +151,21 @@ class GreetingPage extends StatelessWidget {
 
                   const SizedBox(height: 32),
 
-                  // Be Active Button (Primary)
-                  ElevatedButton(
+                  // Be Active Button (Primary) with Gradient
+                  GradientButton(
                     onPressed: () => _navigateToDashboard(context),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
+                    gradient: AppGradients.getPrimaryButton(isDark),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.directions_run, size: 24),
+                        Icon(Icons.directions_run, size: 24, color: Colors.white),
                         SizedBox(width: 12),
                         Text(
                           'Be Active',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -207,7 +214,7 @@ class GreetingPage extends StatelessWidget {
                     'You can update these details anytime',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: AppColors.getTextSecondary(isDark),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -220,7 +227,7 @@ class GreetingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileTiles(BuildContext context, profile) {
+  Widget _buildProfileTiles(BuildContext context, profile, bool isDark) {
     final tiles = <Widget>[];
 
     if (profile.weightKg != null) {
@@ -229,7 +236,8 @@ class GreetingPage extends StatelessWidget {
         icon: Icons.monitor_weight,
         label: 'Weight',
         value: '${profile.weightKg} kg',
-        color: Colors.blue,
+        color: AppColors.getWaterColor(isDark),
+        isDark: isDark,
       ));
     }
 
@@ -239,7 +247,8 @@ class GreetingPage extends StatelessWidget {
         icon: Icons.height,
         label: 'Height',
         value: '${profile.heightCm} cm',
-        color: Colors.green,
+        color: AppColors.getStepsColor(isDark),
+        isDark: isDark,
       ));
     }
 
@@ -249,7 +258,8 @@ class GreetingPage extends StatelessWidget {
         icon: Icons.cake,
         label: 'Age',
         value: '${profile.age} years',
-        color: Colors.orange,
+        color: AppColors.getCaloriesColor(isDark),
+        isDark: isDark,
       ));
     }
 
@@ -270,14 +280,15 @@ class GreetingPage extends StatelessWidget {
     required String label,
     required String value,
     required Color color,
+    required bool isDark,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(isDark ? 0.15 : 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withOpacity(isDark ? 0.4 : 0.3),
           width: 1,
         ),
       ),
@@ -294,7 +305,7 @@ class GreetingPage extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 11,
-                  color: Colors.grey[700],
+                  color: AppColors.getTextSecondary(isDark),
                   fontWeight: FontWeight.w500,
                 ),
               ),
