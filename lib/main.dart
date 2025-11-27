@@ -7,8 +7,9 @@ import 'features/health_records/presentation/providers/health_record_provider.da
 import 'features/health_records/presentation/providers/optimized_step_provider.dart';
 import 'features/health_records/domain/usecases/calculate_calories_usecase.dart';
 import 'features/user_profile/data/user_profile_local.dart';
+import 'features/user_profile/presentation/providers/user_profile_provider.dart';
 import 'features/user_profile/presentation/pages/welcome_page.dart';
-import 'features/health_records/presentation/pages/dashboard_page.dart';
+import 'features/user_profile/presentation/pages/greeting_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +31,11 @@ class MyApp extends StatelessWidget {
           create: (context) => OptimizedStepProvider(
             HealthRepositoryImpl(DatabaseHelper.instance),
             CalculateCaloriesUseCase(),
+            UserProfileLocal(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => UserProfileProvider(
             UserProfileLocal(),
           ),
         ),
@@ -69,8 +75,10 @@ class _SplashScreenState extends State<SplashScreen> {
       
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
+          // If profile exists, always show GreetingPage (not Dashboard)
+          // User must press "Be Active" to go to Dashboard
           builder: (context) => hasProfile 
-              ? const DashboardPage() 
+              ? const GreetingPage() 
               : const WelcomePage(),
         ),
       );

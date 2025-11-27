@@ -7,6 +7,7 @@ class UserProfileLocal {
   static const String _keyWeight = 'user_weight_kg';
   static const String _keyHeight = 'user_height_cm';
   static const String _keyAge = 'user_age';
+  static const String _keyProfileExists = 'user_profile_exists';
 
   /// Save user profile data
   Future<void> saveProfile({
@@ -29,11 +30,23 @@ class UserProfileLocal {
     if (age != null) {
       await prefs.setInt(_keyAge, age);
     }
+    
+    // Mark profile as existing if any data was saved
+    if (name != null || weightKg != null || heightCm != null || age != null) {
+      await prefs.setBool(_keyProfileExists, true);
+    }
   }
 
   /// Load user profile data
-  Future<Map<String, dynamic>> loadProfile() async {
+  Future<Map<String, dynamic>?> loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    // Check if profile exists
+    if (!prefs.containsKey(_keyProfileExists) && 
+        !prefs.containsKey(_keyName) && 
+        !prefs.containsKey(_keyWeight)) {
+      return null;
+    }
 
     return {
       'name': prefs.getString(_keyName),
@@ -52,7 +65,7 @@ class UserProfileLocal {
   /// Check if profile exists (at least name or weight is saved)
   Future<bool> hasProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey(_keyName) || prefs.containsKey(_keyWeight);
+    return prefs.getBool(_keyProfileExists) ?? false;
   }
 
   /// Clear all profile data
@@ -62,5 +75,6 @@ class UserProfileLocal {
     await prefs.remove(_keyWeight);
     await prefs.remove(_keyHeight);
     await prefs.remove(_keyAge);
+    await prefs.remove(_keyProfileExists);
   }
 }

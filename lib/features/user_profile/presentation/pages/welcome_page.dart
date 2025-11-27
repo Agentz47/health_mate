@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../data/user_profile_local.dart';
+import 'package:provider/provider.dart';
+import '../../domain/entities/user_profile.dart';
+import '../providers/user_profile_provider.dart';
+import 'greeting_page.dart';
 import '../../../health_records/presentation/pages/dashboard_page.dart';
 
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({super.key});
+  final bool isEditMode;
+  
+  const WelcomePage({super.key, this.isEditMode = false});
 
   @override
   State<WelcomePage> createState() => _WelcomePageState();
@@ -12,7 +17,6 @@ class WelcomePage extends StatefulWidget {
 
 class _WelcomePageState extends State<WelcomePage> {
   final _formKey = GlobalKey<FormState>();
-  final _userProfileLocal = UserProfileLocal();
 
   // Controllers
   final _nameController = TextEditingController();
@@ -25,7 +29,9 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void initState() {
     super.initState();
-    _loadExistingProfile();
+    if (widget.isEditMode) {
+      _loadExistingProfile();
+    }
   }
 
   @override
@@ -39,23 +45,26 @@ class _WelcomePageState extends State<WelcomePage> {
 
   /// Load existing profile data if available
   Future<void> _loadExistingProfile() async {
-    final profile = await _userProfileLocal.loadProfile();
+    final provider = context.read<UserProfileProvider>();
+    final profile = provider.profile;
     
-    if (profile['name'] != null) {
-      _nameController.text = profile['name'];
-    }
-    if (profile['weightKg'] != null) {
-      _weightController.text = profile['weightKg'].toString();
-    }
-    if (profile['heightCm'] != null) {
-      _heightController.text = profile['heightCm'].toString();
-    }
-    if (profile['age'] != null) {
-      _ageController.text = profile['age'].toString();
+    if (profile != null) {
+      if (profile.name != null) {
+        _nameController.text = profile.name!;
+      }
+      if (profile.weightKg != null) {
+        _weightController.text = profile.weightKg.toString();
+      }
+      if (profile.heightCm != null) {
+        _heightController.text = profile.heightCm.toString();
+      }
+      if (profile.age != null) {
+        _ageController.text = profile.age.toString();
+      }
     }
   }
 
-  /// Save profile and navigate to dashboard
+  /// Save profile and navigate to greeting page
   Future<void> _saveAndContinue() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -81,16 +90,23 @@ class _WelcomePageState extends State<WelcomePage> {
           ? null
           : int.tryParse(_ageController.text.trim());
 
-      // Save profile
-      await _userProfileLocal.saveProfile(
+      // Save profile using provider
+      final provider = context.read<UserProfileProvider>();
+      await provider.saveProfile(UserProfile(
         name: name,
         weightKg: weightKg,
         heightCm: heightCm,
         age: age,
-      );
+      ));
 
       if (mounted) {
-        _navigateToDashboard();
+        if (widget.isEditMode) {
+          // Return to greeting page
+          Navigator.of(context).pop();
+        } else {
+          // Navigate to greeting page
+          _navigateToGreetingPage();
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -111,6 +127,15 @@ class _WelcomePageState extends State<WelcomePage> {
   /// Skip onboarding and go to dashboard
   void _skipAndContinue() {
     _navigateToDashboard();
+  }
+
+  /// Navigate to greeting page
+  void _navigateToGreetingPage() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const GreetingPage(),
+      ),
+    );
   }
 
   /// Navigate to dashboard
