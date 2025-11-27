@@ -24,4 +24,11 @@ abstract class HealthRepository {
 
   /// Upsert today's step count (update if exists, insert if not)
   Future<void> upsertTodaySteps({required String dateString, required int steps});
+
+  /// Upsert today's steps and calories (update if exists, insert if not)
+  Future<void> upsertTodayStepsAndCalories({
+    required String dateString,
+    required int steps,
+    required int calories,
+  });
 }

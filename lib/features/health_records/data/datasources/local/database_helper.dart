@@ -447,4 +447,42 @@ class DatabaseHelper {
       );
     }
   }
+
+  // Upsert today's steps and calories (for personalized calorie calculation)
+  Future<void> upsertTodayStepsAndCalories({
+    required String dateString,
+    required int steps,
+    required int calories,
+  }) async {
+    final db = await database;
+    final existing = await db.query(
+      AppConstants.healthRecordsTable,
+      where: 'date = ?',
+      whereArgs: [dateString],
+    );
+
+    if (existing.isNotEmpty) {
+      // Update existing record with steps and calories
+      await db.update(
+        AppConstants.healthRecordsTable,
+        {
+          'steps': steps,
+          'calories': calories,
+        },
+        where: 'date = ?',
+        whereArgs: [dateString],
+      );
+    } else {
+      // Insert new record with steps, calories, water=0
+      await db.insert(
+        AppConstants.healthRecordsTable,
+        {
+          'date': dateString,
+          'steps': steps,
+          'calories': calories,
+          'water': 0,
+        },
+      );
+    }
+  }
 }

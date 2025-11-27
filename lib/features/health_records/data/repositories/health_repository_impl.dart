@@ -99,4 +99,17 @@ class HealthRepositoryImpl implements HealthRepository {
   Future<void> upsertTodaySteps({required String dateString, required int steps}) async {
     await _databaseHelper.upsertTodaySteps(dateString: dateString, steps: steps);
   }
+
+  @override
+  Future<void> upsertTodayStepsAndCalories({
+    required String dateString,
+    required int steps,
+    required int calories,
+  }) async {
+    await _databaseHelper.upsertTodayStepsAndCalories(
+      dateString: dateString,
+      steps: steps,
+      calories: calories,
+    );
+  }
 }

@@ -6,6 +6,8 @@ import 'package:pedometer/pedometer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../data/repositories/health_repository_impl.dart';
+import '../../domain/usecases/calculate_calories_usecase.dart';
+import '../../../user_profile/data/user_profile_local.dart';
 
 // Tunables
 const int UI_UPDATE_DEBOUNCE_MS = 500;
@@ -21,6 +23,8 @@ const String _kLastDateKey = 'steps_last_date';
 
 class OptimizedStepProvider extends ChangeNotifier {
   final HealthRepositoryImpl _healthRepository;
+  final CalculateCaloriesUseCase _calculateCaloriesUseCase;
+  final UserProfileLocal _userProfileLocal;
   final DateFormat _dateFmt = DateFormat('yyyy-MM-dd');
   
   StreamSubscription<StepCount>? _stepSub;
@@ -39,7 +43,11 @@ class OptimizedStepProvider extends ChangeNotifier {
   int get liveSteps => _liveSteps;
   bool get hasPermission => _permissionGranted;
 
-  OptimizedStepProvider(this._healthRepository) {
+  OptimizedStepProvider(
+    this._healthRepository,
+    this._calculateCaloriesUseCase,
+    this._userProfileLocal,
+  ) {
     _init();
   }
 
@@ -220,16 +228,28 @@ class OptimizedStepProvider extends ChangeNotifier {
     final today = _dateFmt.format(DateTime.now());
     
     try {
-      await _healthRepository.upsertTodaySteps(
+      // Load user weight for personalized calorie calculation
+      final weight = await _userProfileLocal.getWeightKg();
+      
+      // Calculate calories using personalized formula
+      final kcalDouble = _calculateCaloriesUseCase.call(
+        steps: _liveSteps,
+        weightKg: weight,
+      );
+      final int kcal = kcalDouble.round();
+      
+      // Persist both steps and calories
+      await _healthRepository.upsertTodayStepsAndCalories(
         dateString: today,
         steps: _liveSteps,
+        calories: kcal,
       );
       
       _lastSavedSteps = _liveSteps;
       _lastSaveTime = DateTime.now();
       await _savePersistentState();
       
-      debugPrint('Persisted steps: $_liveSteps for $today');
+      debugPrint('Persisted steps: $_liveSteps, calories: $kcal for $today (weight: ${weight ?? "default"} kg)');
     } catch (e) {
       debugPrint('Error persisting steps: $e');
     }
