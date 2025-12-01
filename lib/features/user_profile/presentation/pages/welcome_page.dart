@@ -67,7 +67,7 @@ class _WelcomePageState extends State<WelcomePage> {
     }
   }
 
-  /// Save profile and navigate to greeting page
+  // Save profile and navigate to greeting page
   Future<void> _saveAndContinue() async {
     if (!_formKey.currentState!.validate()) {
       return;

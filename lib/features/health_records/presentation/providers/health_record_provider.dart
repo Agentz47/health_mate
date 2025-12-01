@@ -109,7 +109,7 @@ class HealthRecordProvider extends ChangeNotifier {
     }
   }
 
-  // Add a new health record
+  /// Add a new health record
   Future<bool> addRecord(HealthRecord record) async {
     _setLoading(true);
     _clearError();

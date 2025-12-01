@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Theme provider for managing Light/Dark mode
-
-// Handles theme persistence using SharedPreferences and notifies listeners
-// when the theme changes.
+/// Theme provider for managing Light/Dark mode
+/// 
+/// Handles theme persistence using SharedPreferences and notifies listeners
+/// when the theme changes.
 class ThemeProvider extends ChangeNotifier {
   static const String _prefKey = 'is_dark_mode';
   
@@ -18,7 +18,7 @@ class ThemeProvider extends ChangeNotifier {
     loadTheme();
   }
 
-  // Load saved theme preference from SharedPreferences
+  /// Load saved theme preference from SharedPreferences
   Future<void> loadTheme() async {
     try {
       _isLoading = true;
@@ -36,14 +36,14 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // Toggle between light and dark theme
+  /// Toggle between light and dark theme
   Future<void> toggleTheme() async {
     await setTheme(!_isDark);
   }
 
-  // Set theme to specific mode
-  
-  // [isDark] - true for dark mode, false for light mode
+  /// Set theme to specific mode
+  /// 
+  /// [isDark] - true for dark mode, false for light mode
   Future<void> setTheme(bool isDark) async {
     try {
       _isDark = isDark;
@@ -56,7 +56,7 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  // Get ThemeMode for MaterialApp
+  /// Get ThemeMode for MaterialApp
   ThemeMode get themeMode {
     return _isDark ? ThemeMode.dark : ThemeMode.light;
   }

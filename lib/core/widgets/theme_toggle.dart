@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
 
-/// Reusable theme toggle widget
-/// 
-/// Displays an animated icon button that toggles between light and dark mode.
-/// Can be placed in AppBar, Settings, or anywhere else.
+// Reusable theme toggle widget
+// 
+// Displays an animated icon button that toggles between light and dark mode.
 class ThemeToggle extends StatelessWidget {
   final double? iconSize;
   final Color? iconColor;

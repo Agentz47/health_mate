@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Local storage for user profile using SharedPreferences
+// Local storage for user profile using SharedPreferences
 class UserProfileLocal {
   // SharedPreferences keys
   static const String _keyName = 'user_name';
@@ -9,7 +9,7 @@ class UserProfileLocal {
   static const String _keyAge = 'user_age';
   static const String _keyProfileExists = 'user_profile_exists';
 
-  /// Save user profile data
+  // Save user profile data
   Future<void> saveProfile({
     String? name,
     double? weightKg,
@@ -37,7 +37,7 @@ class UserProfileLocal {
     }
   }
 
-  /// Load user profile data
+  // Load user profile data
   Future<Map<String, dynamic>?> loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
     
@@ -56,19 +56,19 @@ class UserProfileLocal {
     };
   }
 
-  /// Get user weight in kg
+  // Get user weight in kg
   Future<double?> getWeightKg() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_keyWeight);
   }
 
-  /// Check if profile exists (at least name or weight is saved)
+  // Check if profile exists (at least name or weight is saved)
   Future<bool> hasProfile() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyProfileExists) ?? false;
   }
 
-  /// Clear all profile data
+  // Clear all profile data
   Future<void> clearProfile() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyName);

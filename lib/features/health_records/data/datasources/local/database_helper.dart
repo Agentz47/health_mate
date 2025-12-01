@@ -364,7 +364,7 @@ class DatabaseHelper {
     );
   }
 
-  // Achievements methods.
+  // Achievements methods
   Future<List<Map<String, dynamic>>> getAchievements() async {
     final db = await database;
     return await db.query(AppConstants.achievementsTable);

@@ -226,8 +226,8 @@ class _DashboardPageState extends State<DashboardPage> {
           borderRadius: BorderRadius.circular(12),
           gradient: LinearGradient(
             colors: [
-              Colors.deepOrange,
-              Colors.orange,
+              Colors.deepOrange.withOpacity(0.7),
+              Colors.orange.withOpacity(0.5),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
