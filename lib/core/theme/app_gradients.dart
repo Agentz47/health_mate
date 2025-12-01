@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Gradient tokens for Light and Dark themes
-/// 
-/// Provides professional, subtle gradients for backgrounds, cards, and buttons.
-/// All gradients are designed with WCAG accessibility in mind.
+// Gradient tokens for Light and Dark themes
+ 
+// Provides professional, subtle gradients for backgrounds, cards, and buttons.
+// All gradients are designed with WCAG accessibility in mind.
 class AppGradients {
-  // ===== LIGHT THEME GRADIENTS =====
+  // LIGHT THEME GRADIENTS 
   
-  /// Main app background gradient (Light mode)
-  /// Soft blue to white - fresh, clean, professional
+  // Main app background gradient (Light mode)
+  // Soft blue to white
   static const lightBackground = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -18,8 +18,8 @@ class AppGradients {
     ],
   );
 
-  /// Card/Surface gradient (Light mode)
-  /// White to very light grey - subtle depth
+  // Card/Surface gradient (Light mode)
+  // White to very light grey - subtle depth
   static const lightCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -29,8 +29,8 @@ class AppGradients {
     ],
   );
 
-  /// Primary button gradient (Light mode)
-  /// Blue gradient - trustworthy, medical feel
+  // Primary button gradient (Light mode)
+  // Blue gradient - trustworthy, medical feel
   static const lightPrimaryButton = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
@@ -40,8 +40,8 @@ class AppGradients {
     ],
   );
 
-  /// Secondary button gradient (Light mode)
-  /// Teal gradient - calming, health-focused
+  // Secondary button gradient (Light mode)
+  // Teal gradient - calming, health-focused
   static const lightSecondaryButton = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
@@ -51,8 +51,8 @@ class AppGradients {
     ],
   );
 
-  /// Accent gradient for metric cards (Light mode)
-  /// Subtle gradient for health metric cards
+  // Accent gradient for metric cards (Light mode)
+  // Subtle gradient for health metric cards
   static const lightMetricCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -62,7 +62,7 @@ class AppGradients {
     ],
   );
 
-  /// Steps card gradient (Light mode)
+  // Steps card gradient (Light mode)
   static const lightStepsCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -72,7 +72,7 @@ class AppGradients {
     ],
   );
 
-  /// Water card gradient (Light mode)
+  // Water card gradient (Light mode)
   static const lightWaterCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -82,7 +82,7 @@ class AppGradients {
     ],
   );
 
-  /// Calories card gradient (Light mode)
+  // Calories card gradient (Light mode)
   static const lightCaloriesCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -92,10 +92,10 @@ class AppGradients {
     ],
   );
 
-  // ===== DARK THEME GRADIENTS =====
+  //  DARK THEME GRADIENTS 
 
-  /// Main app background gradient (Dark mode)
-  /// Navy to midnight - elegant, professional
+  // Main app background gradient (Dark mode)
+  // Navy to midnight
   static const darkBackground = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -105,8 +105,8 @@ class AppGradients {
     ],
   );
 
-  /// Card/Surface gradient (Dark mode)
-  /// Slate to navy - subtle depth with contrast
+  // Card/Surface gradient (Dark mode)
+  // Slate to navy - subtle depth with contrast
   static const darkCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -116,8 +116,8 @@ class AppGradients {
     ],
   );
 
-  /// Primary button gradient (Dark mode)
-  /// Indigo gradient - modern, vibrant
+  // Primary button gradient (Dark mode)
+  // Indigo gradient - modern, vibrant
   static const darkPrimaryButton = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
@@ -127,8 +127,8 @@ class AppGradients {
     ],
   );
 
-  /// Secondary button gradient (Dark mode)
-  /// Purple gradient - elegant, premium
+  // Secondary button gradient (Dark mode)
+  // Purple gradient - elegant, premium
   static const darkSecondaryButton = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
@@ -138,7 +138,7 @@ class AppGradients {
     ],
   );
 
-  /// Accent gradient for metric cards (Dark mode)
+  // Accent gradient for metric cards (Dark mode)
   static const darkMetricCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -148,7 +148,7 @@ class AppGradients {
     ],
   );
 
-  /// Steps card gradient (Dark mode)
+  // Steps card gradient (Dark mode)
   static const darkStepsCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -158,7 +158,7 @@ class AppGradients {
     ],
   );
 
-  /// Water card gradient (Dark mode)
+  // Water card gradient (Dark mode)
   static const darkWaterCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -168,7 +168,7 @@ class AppGradients {
     ],
   );
 
-  /// Calories card gradient (Dark mode)
+  // Calories card gradient (Dark mode)
   static const darkCaloriesCard = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -178,44 +178,44 @@ class AppGradients {
     ],
   );
 
-  // ===== HELPER METHODS =====
+  // HELPER METHODS
 
-  /// Get background gradient based on theme brightness
+  // Get background gradient based on theme brightness
   static LinearGradient getBackground(bool isDark) {
     return isDark ? darkBackground : lightBackground;
   }
 
-  /// Get card gradient based on theme brightness
+  // Get card gradient based on theme brightness
   static LinearGradient getCard(bool isDark) {
     return isDark ? darkCard : lightCard;
   }
 
-  /// Get primary button gradient based on theme brightness
+  // Get primary button gradient based on theme brightness
   static LinearGradient getPrimaryButton(bool isDark) {
     return isDark ? darkPrimaryButton : lightPrimaryButton;
   }
 
-  /// Get secondary button gradient based on theme brightness
+  // Get secondary button gradient based on theme brightness
   static LinearGradient getSecondaryButton(bool isDark) {
     return isDark ? darkSecondaryButton : lightSecondaryButton;
   }
 
-  /// Get metric card gradient based on theme brightness
+  // Get metric card gradient based on theme brightness
   static LinearGradient getMetricCard(bool isDark) {
     return isDark ? darkMetricCard : lightMetricCard;
   }
 
-  /// Get steps card gradient based on theme brightness
+  // Get steps card gradient based on theme brightness
   static LinearGradient getStepsCard(bool isDark) {
     return isDark ? darkStepsCard : lightStepsCard;
   }
 
-  /// Get water card gradient based on theme brightness
+  // Get water card gradient based on theme brightness
   static LinearGradient getWaterCard(bool isDark) {
     return isDark ? darkWaterCard : lightWaterCard;
   }
 
-  /// Get calories card gradient based on theme brightness
+  // Get calories card gradient based on theme brightness
   static LinearGradient getCaloriesCard(bool isDark) {
     return isDark ? darkCaloriesCard : lightCaloriesCard;
   }

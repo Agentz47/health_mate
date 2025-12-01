@@ -26,7 +26,7 @@ class HealthRecordProvider extends ChangeNotifier {
   int get waterGoal => _waterGoal;
   List<Map<String, dynamic>> get achievements => _achievements;
 
-  /// Returns the list of achievements that are unlocked for today only
+  // Returns the list of achievements that are unlocked for today only
   List<Map<String, dynamic>> get earnedAchievements {
     final today = _todayRecord;
     if (today == null) return [];
@@ -109,7 +109,7 @@ class HealthRecordProvider extends ChangeNotifier {
     }
   }
 
-  /// Add a new health record
+  // Add a new health record
   Future<bool> addRecord(HealthRecord record) async {
     _setLoading(true);
     _clearError();
